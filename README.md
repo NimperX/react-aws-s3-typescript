@@ -63,44 +63,47 @@ You can define a default directory for uploads using the s3Config object
 ```typescript
     /* AWS S3 Client */
     /* uploadFile.ts */
-    import S3 from 'react-aws-s3-typescript';
+    import ReactS3Client from 'react-aws-s3-typescript';
     import { s3Config } from './s3Config.ts';
 
-    /* Import s3 config object and call the constrcutor */
-    const s3 = new S3(s3Config);
+    const uploadFile = async () => {
+        /* Import s3 config object and call the constrcutor */
+        const s3 = new ReactS3Client(s3Config);
 
-    /* You can use the default directory defined in s3Config object
-     * Or you can a define custom directory to upload when calling the
-     * constructor using js/ts object destructuring.
-     * 
-     * const s3 = new S3({
-     *      ...s3Config,
-     *      dirName: 'custom-directory'
-     * });
-     * 
-     */
+        /* You can use the default directory defined in s3Config object
+        * Or you can a define custom directory to upload when calling the
+        * constructor using js/ts object destructuring.
+        * 
+        * const s3 = new ReactS3Client({
+        *      ...s3Config,
+        *      dirName: 'custom-directory'
+        * });
+        * 
+        */
 
-    const filename = 'filename-to-be-uploaded';     /* Optional */
+        const filename = 'filename-to-be-uploaded';     /* Optional */
 
-    /* If you do not specify a file name, file will be uploaded using uuid generated 
-     * by short-UUID (https://www.npmjs.com/package/short-uuid)
-     */
+        /* If you do not specify a file name, file will be uploaded using uuid generated 
+        * by short-UUID (https://www.npmjs.com/package/short-uuid)
+        */
 
+        try {
+            const res = await s3.uploadFile(file, filename);
 
-    s3.uploadFile(file, filename).then((res) => {
-        console.log(res);
-        /*
-         * {
-         *   Response: {
-         *     bucket: "bucket-name",
-         *     key: "directory-name/filename-to-be-uploaded",
-         *     location: "https:/your-aws-s3-bucket-url/directory-name/filename-to-be-uploaded"
-         *   }
-         * }
-         */
-    }).catch((err) => {
-        console.log(err);
-    })
+            console.log(res);
+            /*
+            * {
+            *   Response: {
+            *     bucket: "bucket-name",
+            *     key: "directory-name/filename-to-be-uploaded",
+            *     location: "https:/your-aws-s3-bucket-url/directory-name/filename-to-be-uploaded"
+            *   }
+            * }
+            */
+        } catch (exception) {
+            console.log(exception);
+            /* handle the exception */
+        }
 
     /* End of uploadFile.ts */
 ```
@@ -110,20 +113,25 @@ You can define a default directory for uploads using the s3Config object
 ```typescript
     /* AWS S3 Client */
     /* deleteFile.ts */
-    import S3 from 'react-aws-s3-typescript';
+    import ReactS3Client from 'react-aws-s3-typescript';
     import { s3Config } from './s3Config.ts';
 
-    /* Import s3 config object and call the constrcutor */
-    const s3 = new S3(s3Config);
+    const deleteFile = async () => {
+        /* Import s3 config object and call the constrcutor */
+        const s3 = new ReactS3Client(s3Config);
 
-    /* Define the filepath from the root of the bucket to the file to be deleted */
-    const filepath = 'directory-name/filename-to-be-deleted';
+        /* Define the filepath from the root of the bucket to the file to be deleted */
+        const filepath = 'directory-name/filename-to-be-deleted';
 
-    await s3.deleteFile(filepath).then((res) => {
-        console.log('File deleted');
-    }).catch((err) => {
-        console.log(err);
-    })
+        try {
+            await s3.deleteFile(filepath);
+
+            console.log('File deleted');
+        } catch (exception) {
+            console.log(exception);
+            /* handle the exception */
+        }
+    }
 
     /* End of deleteFile.ts */
 ```
