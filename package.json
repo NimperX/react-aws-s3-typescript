@@ -1,6 +1,6 @@
 {
     "name": "react-aws-s3-typescript",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Open source npm package to upload your files into AWS S3 Bucket directly using react(typescript template)",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
