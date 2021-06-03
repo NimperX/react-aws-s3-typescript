@@ -21,4 +21,4 @@ export const throwUploadError = (config: IConfig, file: File) => {
   if (!file) {
     throw new Error(`File cannot be empty`);
   }
-}
+};

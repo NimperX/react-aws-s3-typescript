@@ -49,7 +49,7 @@ export type DeleteResponse = {
 
 export type ListFileResponse = {
   message: string;
-  data: AWS.S3.ListObjectsOutput
+  data: AWS.S3.ListObjectsOutput;
 };
 
 export type ListFileErrorResponse = {

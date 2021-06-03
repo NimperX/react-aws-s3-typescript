@@ -93,15 +93,17 @@ class ReactS3Client {
     });
 
     try {
-      const req = await s3.listObjects({
-        Bucket: this.config.bucketName,
-      }).promise();
+      const req = await s3
+        .listObjects({
+          Bucket: this.config.bucketName,
+        })
+        .promise();
 
       if (req.$response.error) {
         return Promise.reject<ListFileErrorResponse>({
           err: req.$response.error.name,
           errMessage: req.$response.error.message,
-          data: req.$response.error
+          data: req.$response.error,
         });
       }
 
@@ -109,19 +111,19 @@ class ReactS3Client {
         return Promise.reject<ListFileErrorResponse>({
           err: 'Something went wrong!',
           errMessage: 'Unknown error occured. Please try again',
-          data: null
+          data: null,
         });
       }
 
       return Promise.resolve<ListFileResponse>({
         message: 'Objects listed succesfully',
-        data: req.$response.data
+        data: req.$response.data,
       });
     } catch (err) {
       return Promise.reject<ListFileErrorResponse>({
         err: 'Something went wrong!',
         errMessage: 'Unknown error occured. Please try again',
-        data: err
+        data: err,
       });
     }
   }
