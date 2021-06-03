@@ -46,3 +46,14 @@ export type DeleteResponse = {
   message: string;
   fileName: string;
 };
+
+export type ListFileResponse = {
+  message: string;
+  data: AWS.S3.ListObjectsOutput
+};
+
+export type ListFileErrorResponse = {
+  err: string;
+  errMessage: string;
+  data: any;
+};

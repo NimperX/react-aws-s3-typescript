@@ -1,7 +1,7 @@
 import shortId from 'short-uuid';
 import { dateYMD, xAmzDate } from './Date';
-import { IConfig, DeleteResponse, UploadResponse } from './types';
-import { throwError } from './ErrorThrower';
+import { IConfig, ListFileErrorResponse, ListFileResponse, UploadResponse } from './types';
+import { throwUploadError } from './ErrorThrower';
 import GetUrl from './Url';
 import Policy from './Policy';
 import Signature from './Signature';
@@ -13,7 +13,7 @@ class ReactS3Client {
     this.config = config;
   }
   public async uploadFile(file: File, newFileName?: string): Promise<UploadResponse> {
-    throwError(this.config, file);
+    throwUploadError(this.config, file);
     let fileExtension: string;
     const fd = new FormData();
 
@@ -77,6 +77,53 @@ class ReactS3Client {
         });
       },
     );
+  }
+
+  public async listFiles() {
+    const awsConfig = (({ region, accessKeyId, secretAccessKey }) => ({ region, accessKeyId, secretAccessKey }))(
+      this.config,
+    );
+    AWS.config.update(awsConfig);
+
+    const s3 = new AWS.S3({
+      apiVersion: '2006-03-01',
+      params: {
+        Bucket: this.config.bucketName,
+      },
+    });
+
+    try {
+      const req = await s3.listObjects({
+        Bucket: this.config.bucketName,
+      }).promise();
+
+      if (req.$response.error) {
+        return Promise.reject<ListFileErrorResponse>({
+          err: req.$response.error.name,
+          errMessage: req.$response.error.message,
+          data: req.$response.error
+        });
+      }
+
+      if (!req.$response.data) {
+        return Promise.reject<ListFileErrorResponse>({
+          err: 'Something went wrong!',
+          errMessage: 'Unknown error occured. Please try again',
+          data: null
+        });
+      }
+
+      return Promise.resolve<ListFileResponse>({
+        message: 'Objects listed succesfully',
+        data: req.$response.data
+      });
+    } catch (err) {
+      return Promise.reject<ListFileErrorResponse>({
+        err: 'Something went wrong!',
+        errMessage: 'Unknown error occured. Please try again',
+        data: err
+      });
+    }
   }
 }
 

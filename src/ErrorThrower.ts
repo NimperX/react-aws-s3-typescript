@@ -1,6 +1,6 @@
 import { IConfig } from './types';
 
-export const throwError = (config: IConfig, file: File) => {
+export const throwError = (config: IConfig) => {
   if (config.bucketName === null || config.bucketName === '') {
     throw new Error(`Your bucketName cannot be empty `);
   }
@@ -13,7 +13,12 @@ export const throwError = (config: IConfig, file: File) => {
   if (config.secretAccessKey === null || config.secretAccessKey === '') {
     throw new Error(`Must provide secretAccessKey`);
   }
+};
+
+export const throwUploadError = (config: IConfig, file: File) => {
+  throwError(config);
+
   if (!file) {
     throw new Error(`File cannot be empty`);
   }
-};
+}
