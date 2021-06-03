@@ -108,6 +108,39 @@ You can define a default directory for uploads using the s3Config object
     /* End of uploadFile.ts */
 ```
 
+### List files of a AWS S3 Bucket
+
+```typescript
+    /* AWS S3 Client */
+    /* listFiles.ts */
+    import ReactS3Client from 'react-aws-s3-typescript';
+    import { s3Config } from './s3Config.ts';
+
+    const listFiles = async () => {
+        /* Import s3 config object and call the constrcutor */
+        const s3 = new ReactS3Client(s3Config);
+
+        try {
+            const fileList = await s3.listFiles();
+
+            console.log(fileList);
+            /*
+            * {
+            *   Response: {
+            *     message: "Objects listed succesfully",
+            *     data: List of Objects
+            *   }
+            * }
+            */
+        } catch (exception) {
+            console.log(exception);
+            /* handle the exception */
+        }
+    }
+
+    /* End of listFiles.ts */
+```
+
 ### Delete a file from AWS S3 Bucket
 
 ```typescript
