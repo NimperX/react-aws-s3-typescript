@@ -130,7 +130,10 @@ You can define a default directory for uploads using the s3Config object
             * {
             *   Response: {
             *     message: "Objects listed succesfully",
-            *     data: List of Objects
+            *     data: {                   // List of Objects
+            *       ...                     // Meta data
+            *       Contents: []            // Array of objects in the bucket
+            *     }
             *   }
             * }
             */
