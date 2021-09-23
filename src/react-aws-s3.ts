@@ -91,6 +91,7 @@ class ReactS3Client {
         Bucket: this.config.bucketName,
       },
     });
+    const url: string = GetUrl(this.config);
 
     try {
       const req = await s3
@@ -117,7 +118,10 @@ class ReactS3Client {
 
       return Promise.resolve<ListFileResponse>({
         message: 'Objects listed succesfully',
-        data: req.$response.data,
+        data: {
+          ...req.$response.data,
+          Contents: req.$response.data.Contents?.map((e) => ({ ...e, publicUrl: `${url}/${e.Key}` }))
+        }
       });
     } catch (err) {
       return Promise.reject<ListFileErrorResponse>({
