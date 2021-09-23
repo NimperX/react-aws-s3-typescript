@@ -120,8 +120,8 @@ class ReactS3Client {
         message: 'Objects listed succesfully',
         data: {
           ...req.$response.data,
-          Contents: req.$response.data.Contents?.map((e) => ({ ...e, publicUrl: `${url}/${e.Key}` }))
-        }
+          Contents: req.$response.data.Contents?.map((e) => ({ ...e, publicUrl: `${url}/${e.Key}` })),
+        },
       });
     } catch (err) {
       return Promise.reject<ListFileErrorResponse>({
