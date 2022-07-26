@@ -21,9 +21,9 @@ class ReactS3Client {
       fileExtension = file.type.split('/').pop() || '';
     }
 
-    const fileName = `${newFileName || shortId.generate()}${fileExtension && ('.' + fileExtension)}`;
+    const fileName = `${newFileName || shortId.generate()}${fileExtension && '.' + fileExtension}`;
     // remove duplicate forward slashes
-    const dirName = (this.config.dirName ? this.config.dirName + '/' : '').replace(/([^:]\/)\/+/g, '$1')
+    const dirName = (this.config.dirName ? this.config.dirName + '/' : '').replace(/([^:]\/)\/+/g, '$1');
     const key = `${dirName}${fileName}`;
     const url: string = GetUrl(this.config);
     fd.append('key', key);
