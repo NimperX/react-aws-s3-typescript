@@ -1,5 +1,6 @@
 import { dateISOString, dateYMD, xAmzDate } from './Date';
 import { IConfig, Policy as PolicyType } from './types';
+import { Buffer } from 'buffer';
 
 export default class Policy {
   public static getPolicy(config: IConfig): string {
@@ -23,7 +24,6 @@ export default class Policy {
       };
     };
     // Returns a base64 policy;
-    // tslint:disable-next-line: deprecation
-    return new Buffer(JSON.stringify(policy())).toString('base64').replace(/\n|\r/, '');
+    return Buffer.from(JSON.stringify(policy())).toString('base64').replace(/\n|\r/, '');
   }
 }

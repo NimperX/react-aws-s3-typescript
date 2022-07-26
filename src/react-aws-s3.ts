@@ -14,17 +14,17 @@ class ReactS3Client {
   }
   public async uploadFile(file: File, newFileName?: string): Promise<UploadResponse> {
     throwUploadError(this.config, file);
-    let fileExtension: string;
+    let fileExtension: string = '';
     const fd = new FormData();
 
-    if (file.type == null) {
-      fileExtension = '';
-    } else {
-      fileExtension = file.type.split('/')[1];
+    if (file.type != null) {
+      fileExtension = file.type.split('/').pop() || '';
     }
 
-    const fileName = `${newFileName || shortId.generate()}.${fileExtension}`;
-    const key = `${this.config.dirName ? this.config.dirName + '/' : ''}${fileName}`;
+    const fileName = `${newFileName || shortId.generate()}${fileExtension && ('.' + fileExtension)}`;
+    // remove duplicate forward slashes
+    const dirName = (this.config.dirName ? this.config.dirName + '/' : '').replace(/([^:]\/)\/+/g, '$1')
+    const key = `${dirName}${fileName}`;
     const url: string = GetUrl(this.config);
     fd.append('key', key);
     fd.append('acl', 'public-read');
@@ -43,8 +43,8 @@ class ReactS3Client {
     if (!data.ok) return Promise.reject(data);
     return Promise.resolve({
       bucket: this.config.bucketName,
-      key: `${this.config.dirName ? this.config.dirName + '/' : ''}${fileName}`,
-      location: `${url}/${this.config.dirName ? this.config.dirName + '/' : ''}${fileName}`,
+      key,
+      location: `${url}/${key}`,
       status: data.status,
     });
   }
