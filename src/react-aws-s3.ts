@@ -17,7 +17,11 @@ class ReactS3Client {
     let fileExtension: string = '';
     const fd = new FormData();
 
-    if (file.type != null) {
+    if (file.name) {
+      fileExtension = file.name.split('.').pop() || '';
+    }
+
+    if (!fileExtension && file.type != null) {
       fileExtension = file.type.split('/').pop() || '';
     }
 
