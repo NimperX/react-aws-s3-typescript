@@ -1,3 +1,5 @@
+import { ListObjectsV2CommandOutput } from "@aws-sdk/client-s3";
+
 export type DateISOString = string; // "2019-01-27T11:07:43.102Z"
 export type XAmzDate = string; // "20190127T110743102Z"
 export type DateYMD = string; // "20190127"
@@ -37,7 +39,7 @@ export type UploadResponse = {
   bucket: string;
   key: string;
   location: string;
-  status: number;
+  status?: number;
 };
 
 export type DeleteResponse = {
@@ -49,7 +51,7 @@ export type DeleteResponse = {
 
 export type ListFileResponse = {
   message: string;
-  data: AWS.S3.ListObjectsOutput;
+  data: ListObjectsV2CommandOutput;
 };
 
 export type ListFileErrorResponse = {

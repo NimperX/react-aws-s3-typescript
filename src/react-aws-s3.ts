@@ -1,16 +1,15 @@
 import shortId from 'short-uuid';
-import { dateYMD, xAmzDate } from './Date';
 import { IConfig, ListFileErrorResponse, ListFileResponse, UploadResponse } from './types';
 import { throwUploadError } from './ErrorThrower';
 import GetUrl from './Url';
-import Policy from './Policy';
-import Signature from './Signature';
-import AWS from 'aws-sdk';
+import { S3Client, PutObjectCommand, DeleteObjectCommand, ListObjectsV2Command   } from "@aws-sdk/client-s3"
 
 class ReactS3Client {
   private config: IConfig;
+  private client: S3Client;
   constructor(config: IConfig) {
     this.config = config;
+    this.client = new S3Client(config);
   }
   public async uploadFile(file: File, newFileName?: string): Promise<UploadResponse> {
     throwUploadError(this.config, file);
@@ -30,107 +29,64 @@ class ReactS3Client {
     const dirName = (this.config.dirName ? this.config.dirName + '/' : '').replace(/([^:]\/)\/+/g, '$1');
     const key = `${dirName}${fileName}`;
     const url: string = GetUrl(this.config);
-    fd.append('key', key);
-    fd.append('acl', 'public-read');
-    fd.append('Content-Type', file.type);
-    fd.append('x-amz-meta-uuid', '14365123651274');
-    fd.append('x-amz-server-side-encryption', 'AES256');
-    fd.append('X-Amz-Credential', `${this.config.accessKeyId}/${dateYMD}/${this.config.region}/s3/aws4_request`);
-    fd.append('X-Amz-Algorithm', 'AWS4-HMAC-SHA256');
-    fd.append('X-Amz-Date', xAmzDate);
-    fd.append('x-amz-meta-tag', '');
-    fd.append('Policy', Policy.getPolicy(this.config));
-    fd.append('X-Amz-Signature', Signature.getSignature(this.config, dateYMD, Policy.getPolicy(this.config)));
-    fd.append('file', file);
+    
+    const command = new PutObjectCommand({
+      Bucket: this.config.bucketName,
+      Key: key,
+      ACL: 'public-read',
+      ContentType: file.type,
+      ServerSideEncryption: 'AES256'
+    })
 
-    const data = await fetch(url, { method: 'post', body: fd });
-    if (!data.ok) return Promise.reject(data);
-    return Promise.resolve({
-      bucket: this.config.bucketName,
-      key,
-      location: `${url}/${key}`,
-      status: data.status,
-    });
+    try {
+      await this.client.send(command);
+      return Promise.resolve({
+        bucket: this.config.bucketName,
+        key,
+        location: `${url}/${key}`
+      });
+    } catch (err) {
+      return Promise.reject(err);
+    }
   }
 
   public async deleteFile(key: string) {
-    const awsConfig = (({ region, accessKeyId, secretAccessKey }) => ({ region, accessKeyId, secretAccessKey }))(
-      this.config,
-    );
-    AWS.config.update(awsConfig);
+    const command = new DeleteObjectCommand({
+      Bucket: this.config.bucketName,
+      Key: key
+    })
 
-    const s3 = new AWS.S3({
-      apiVersion: '2006-03-01',
-      params: {
-        Bucket: this.config.bucketName,
-      },
-    });
-
-    s3.deleteObject(
-      {
-        Bucket: this.config.bucketName,
-        Key: key,
-      },
-      (err, data) => {
-        if (err) return Promise.reject(err);
-
-        return Promise.resolve({
-          message: 'File deleted',
-          key,
-          data,
-        });
-      },
-    );
+    try {
+      await this.client.send(command);
+      return Promise.resolve({
+        message: 'File deleted',
+        key
+      });
+    } catch (err) {
+      return Promise.reject(err);
+    }
   }
 
   public async listFiles() {
-    const awsConfig = (({ region, accessKeyId, secretAccessKey }) => ({ region, accessKeyId, secretAccessKey }))(
-      this.config,
-    );
-    AWS.config.update(awsConfig);
-
-    const s3 = new AWS.S3({
-      apiVersion: '2006-03-01',
-      params: {
-        Bucket: this.config.bucketName,
-      },
-    });
     const url: string = GetUrl(this.config);
+    const command = new ListObjectsV2Command({
+      Bucket: this.config.bucketName
+    })
 
     try {
-      const req = await s3
-        .listObjects({
-          Bucket: this.config.bucketName,
-        })
-        .promise();
-
-      if (req.$response.error) {
-        return Promise.reject<ListFileErrorResponse>({
-          err: req.$response.error.name,
-          errMessage: req.$response.error.message,
-          data: req.$response.error,
-        });
-      }
-
-      if (!req.$response.data) {
-        return Promise.reject<ListFileErrorResponse>({
-          err: 'Something went wrong!',
-          errMessage: 'Unknown error occured. Please try again',
-          data: null,
-        });
-      }
+      const response = await this.client.send(command);
 
       return Promise.resolve<ListFileResponse>({
         message: 'Objects listed succesfully',
         data: {
-          ...req.$response.data,
-          Contents: req.$response.data.Contents?.map((e) => ({ ...e, publicUrl: `${url}/${e.Key}` })),
+          ...response,
+          Contents: response.Contents?.map((e) => ({ ...e, publicUrl: `${url}/${e.Key}` })),
         },
       });
-    } catch (err) {
+    } catch (err: any) {
       return Promise.reject<ListFileErrorResponse>({
-        err: 'Something went wrong!',
-        errMessage: 'Unknown error occured. Please try again',
+        err: err.message || 'Something went wrong!',
+        errMessage: err.message || 'Unknown error occured. Please try again',
         data: err,
       });
     }
