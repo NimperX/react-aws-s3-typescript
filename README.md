@@ -106,6 +106,7 @@ You can define a default directory for uploads using the s3Config object
             console.log(exception);
             /* handle the exception */
         }
+    }
 
     /* End of uploadFile.ts */
 ```
