@@ -24,6 +24,6 @@ export default class Policy {
       };
     };
     // Returns a base64 policy;
-    return Buffer.from(JSON.stringify(policy())).toString('base64').replace(/\n|\r/, '');
+    return Buffer.from(JSON.stringify(policy())).toString('base64').replace(/\n|\r/g, '');
   }
 }
